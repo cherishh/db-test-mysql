@@ -1,3 +1,3 @@
-// import { authMiddleware } from "@clerk/nextjs";
+import { NextRequest, NextResponse } from 'next/server'
  
-export default function middleware(req, res, next) {};
+export default function middleware(req: NextRequest, res: NextResponse, next: any) {};
