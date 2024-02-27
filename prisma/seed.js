@@ -10,11 +10,11 @@ const load = async () => {
     await prisma.product.deleteMany();
     console.log('Deleted records in product table');
 
-    await prisma.$queryRaw`ALTER TABLE Product AUTO_INCREMENT = 1`;
-    console.log('reset product auto increment to 1');
+    // await prisma.$queryRaw`ALTER TABLE Product AUTO_INCREMENT = 1`;
+    // console.log('reset product auto increment to 1');
 
-    await prisma.$queryRaw`ALTER TABLE Category AUTO_INCREMENT = 1`;
-    console.log('reset category auto increment to 1');
+    // await prisma.$queryRaw`ALTER TABLE Category AUTO_INCREMENT = 1`;
+    // console.log('reset category auto increment to 1');
 
     await prisma.category.createMany({
       data: categories,

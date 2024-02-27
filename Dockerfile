@@ -28,9 +28,12 @@ RUN apt-get update -qq && \
 COPY --link package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile --prod=false
 
+ENV NODE_TLS_REJECT_UNAUTHORIZED=0
+RUN pnpm config set strict-ssl false
+
 # Generate Prisma Client
 COPY --link prisma .
-RUN npx prisma generate
+RUN pnpx prisma generate
 
 # Copy application code
 COPY --link . .

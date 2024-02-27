@@ -3,8 +3,10 @@ import prisma from '../lib/prisma';
 import { revalidatePath } from 'next/cache';
 
 export default async function Home() {
-  const data = await prisma.product.findMany({});
-  console.log(data, 'data');
+  const data = await prisma.product.findMany();
+  if (!data) {
+    return 'no product exists';
+  }
 
   const handleAdd = async (data: FormData) => {
     'use server';
