@@ -7,7 +7,7 @@ kill_timeout = 5
 [env]
   PORT = "3000"
   NODE_ENV = "production"
-  PRIMARY_REGION = "mad"
+  PRIMARY_REGION = "nrt"
 
 [experimental]
   allowed_public_ports = []
@@ -36,4 +36,4 @@ kill_timeout = 5
     grace_period = "10s"
     interval = "15s"
     restart_limit = 6
-    timeout = "5s"
+    timeout = "2s"

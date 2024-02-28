@@ -5,6 +5,10 @@ FROM node:${NODE_VERSION}-slim as base
 # Install openssl for Prisma
 RUN apt-get update && apt-get install -y openssl && apt-get install -y ca-certificates
 
+# Install pnpm
+ARG PNPM_VERSION=8.15.3
+RUN npm install -g pnpm@$PNPM_VERSION
+
 # Install all node_modules, including dev dependencies
 FROM base as deps
 
@@ -34,7 +38,7 @@ WORKDIR /app
 
 COPY --from=deps /app/node_modules /app/node_modules
 
-# If we're using Prisma, uncomment to cache the prisma schema
+# Create prisma client
 ADD prisma .
 RUN pnpx prisma generate
 
@@ -51,9 +55,8 @@ WORKDIR /app
 
 COPY --from=production-deps /app/node_modules /app/node_modules
 
-# Uncomment if using Prisma
-COPY --from=build /app/node_modules/.prisma /app/node_modules/.prisma
-
+# move prisma client generated schema
+COPY --from=build /app/node_modules/.pnpm/@prisma+client@5.10.2_prisma@5.10.2/node_modules/.prisma /app/node_modules/.pnpm/@prisma+client@5.10.2_prisma@5.10.2/node_modules/.prisma
 COPY --from=build /app/.next /app/.next
 COPY --from=build /app/public /app/public
 ADD . .
