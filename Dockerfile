@@ -36,7 +36,7 @@ COPY --from=deps /app/node_modules /app/node_modules
 
 # If we're using Prisma, uncomment to cache the prisma schema
 ADD prisma .
-RUN npx prisma generate
+RUN pnpx prisma generate
 
 ADD . .
 RUN pnpm build
