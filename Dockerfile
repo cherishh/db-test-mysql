@@ -22,7 +22,7 @@ FROM base as build
 
 # Install packages needed to build node modules
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential node-gyp openssl pkg-config python-is-python3
+    apt-get install --no-install-recommends -y build-essential node-gyp openssl pkg-config python-is-python3 ca-certificates
 
 # Install node modules
 COPY --link package.json pnpm-lock.yaml ./
@@ -51,7 +51,8 @@ FROM base
 # Install packages needed for deployment
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y openssl && \
-    rm -rf /var/lib/apt/lists /var/cache/apt/archives
+    rm -rf /var/lib/apt/lists /var/cache/apt/archives && \
+    apt-get ca-certificates
 
 # Copy built application
 COPY --from=build /app /app
