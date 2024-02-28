@@ -8,6 +8,7 @@ export default async function Home() {
     return 'no product exists';
   }
 
+
   const handleAdd = async (data: FormData) => {
     'use server';
     const name = String(data.get('name'));
@@ -38,6 +39,9 @@ export default async function Home() {
 
   return (
     <main className='flex min-h-screen w-full p-4'>
+      <div>
+        test
+      </div>
       <div className='bg-green-300'>
         <h1>Products</h1>
         <ul>
