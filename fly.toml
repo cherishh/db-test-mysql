@@ -1,22 +1,39 @@
-# fly.toml app configuration file generated for db-test-mysql on 2024-02-27T12:09:01+08:00
-#
-# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
-#
-
 app = 'db-test-mysql'
 primary_region = 'nrt'
 
-[build]
+kill_signal = "SIGINT"
+kill_timeout = 5
 
-[http_service]
+[env]
+  PORT = "3000"
+  NODE_ENV = "production"
+  PRIMARY_REGION = "mad"
+
+[experimental]
+  allowed_public_ports = []
+  auto_rollback = true
+
+[[services]]
   internal_port = 3000
-  force_https = true
-  auto_stop_machines = true
-  auto_start_machines = true
-  min_machines_running = 0
-  processes = ['app']
+  protocol = "tcp"
+  script_checks = []
 
-[[vm]]
-  memory = '1gb'
-  cpu_kind = 'shared'
-  cpus = 1
+  [services.concurrency]
+    hard_limit = 200
+    soft_limit = 150
+    type = "requests"
+
+  [[services.ports]]
+    handlers = ["http"]
+    port = 80
+    force_https = true
+
+  [[services.ports]]
+    handlers = ["tls", "http"]
+    port = 443
+
+  [[services.tcp_checks]]
+    grace_period = "10s"
+    interval = "15s"
+    restart_limit = 6
+    timeout = "5s"

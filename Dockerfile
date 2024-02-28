@@ -1,62 +1,61 @@
-# syntax = docker/dockerfile:1
-
 # Adjust NODE_VERSION as desired
 ARG NODE_VERSION=20.11.0
 FROM node:${NODE_VERSION}-slim as base
 
-LABEL fly_launch_runtime="Next.js/Prisma"
+# Install openssl for Prisma
+RUN apt-get update && apt-get install -y openssl && apt-get install -y ca-certificates
 
-# Next.js/Prisma app lives here
+# Install all node_modules, including dev dependencies
+FROM base as deps
+
+RUN mkdir /app
 WORKDIR /app
 
-# Set production environment
-ENV NODE_ENV="production"
+ADD package.json package-lock.json ./
+RUN npm install --production=false
 
-# Install pnpm
-ARG PNPM_VERSION=8.15.3
-RUN npm install -g pnpm@$PNPM_VERSION
+# Setup production node_modules
+FROM base as production-deps
 
+RUN mkdir /app
+WORKDIR /app
 
-# Throw-away build stage to reduce size of final image
+COPY --from=deps /app/node_modules /app/node_modules
+ADD package.json package-lock.json ./
+RUN npm prune --production
+
+# Build the app
 FROM base as build
 
-# Install packages needed to build node modules
-RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential node-gyp openssl pkg-config python-is-python3 ca-certificates
+ENV NODE_ENV=production
 
-# Install node modules
-COPY --link package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile --prod=false
+RUN mkdir /app
+WORKDIR /app
 
-ENV NODE_TLS_REJECT_UNAUTHORIZED=0
-RUN pnpm config set strict-ssl false
+COPY --from=deps /app/node_modules /app/node_modules
 
-# Generate Prisma Client
-COPY --link prisma .
-RUN pnpx prisma generate
+# If we're using Prisma, uncomment to cache the prisma schema
+ADD prisma .
+RUN npx prisma generate
 
-# Copy application code
-COPY --link . .
+ADD . .
+RUN npm run build
 
-# Build application
-RUN pnpm run build
-
-# Remove development dependencies
-RUN pnpm prune --prod
-
-
-# Final stage for app image
+# Finally, build the production image with minimal footprint
 FROM base
 
-# Install packages needed for deployment
-RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y openssl && \
-    rm -rf /var/lib/apt/lists /var/cache/apt/archives && \
-    apt-get ca-certificates
+ENV NODE_ENV=production
 
-# Copy built application
-COPY --from=build /app /app
+RUN mkdir /app
+WORKDIR /app
 
-# Start the server by default, this can be overwritten at runtime
-EXPOSE 3000
-CMD [ "pnpm", "run", "start" ]
+COPY --from=production-deps /app/node_modules /app/node_modules
+
+# Uncomment if using Prisma
+COPY --from=build /app/node_modules/.prisma /app/node_modules/.prisma
+
+COPY --from=build /app/.next /app/.next
+COPY --from=build /app/public /app/public
+ADD . .
+
+CMD ["npm", "run", "start"]

@@ -44,6 +44,7 @@ export default async function Home() {
           {data.map((product) => (
             <li key={product.id} className='mb-2'>
               <h2>{product.name}</h2>
+              <p>id: {product.id}</p>
               <p>{product.description}</p>
               <p>{String(product.price)}</p>
             </li>
