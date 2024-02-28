@@ -11,8 +11,8 @@ FROM base as deps
 RUN mkdir /app
 WORKDIR /app
 
-ADD package.json package-lock.json ./
-RUN npm install --production=false
+ADD package.json pnpm-lock.yaml ./
+RUN pnpm install --production=false
 
 # Setup production node_modules
 FROM base as production-deps
@@ -21,8 +21,8 @@ RUN mkdir /app
 WORKDIR /app
 
 COPY --from=deps /app/node_modules /app/node_modules
-ADD package.json package-lock.json ./
-RUN npm prune --production
+ADD package.json pnpm-lock.yaml ./
+RUN pnpm prune --production
 
 # Build the app
 FROM base as build
@@ -39,7 +39,7 @@ ADD prisma .
 RUN npx prisma generate
 
 ADD . .
-RUN npm run build
+RUN pnpm build
 
 # Finally, build the production image with minimal footprint
 FROM base
@@ -58,4 +58,4 @@ COPY --from=build /app/.next /app/.next
 COPY --from=build /app/public /app/public
 ADD . .
 
-CMD ["npm", "run", "start"]
+CMD ["pnpm", "run", "start"]
