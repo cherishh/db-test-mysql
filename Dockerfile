@@ -32,6 +32,7 @@ RUN pnpm prune --production
 FROM base as build
 
 ENV NODE_ENV=production
+ENV DATABASE_URL=postgres://db_test_pg:p7q10EzZqmv8ND5@db-test-pg-self-host-db.flycast:5432/db_test_pg?sslmode=disable
 
 RUN mkdir /app
 WORKDIR /app
@@ -41,6 +42,8 @@ COPY --from=deps /app/node_modules /app/node_modules
 # Create prisma client
 ADD prisma .
 RUN pnpx prisma generate
+
+RUN pnpx prisma db push
 
 ADD . .
 RUN pnpm build
