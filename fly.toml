@@ -1,39 +1,22 @@
-app = 'db-test-mysql'
+# fly.toml app configuration file generated for db-test-pg-sin2 on 2024-03-08T16:40:27+08:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'db-test-pg-self'
 primary_region = 'nrt'
 
-kill_signal = "SIGINT"
-kill_timeout = 5
+[build]
 
-[env]
-  PORT = "3000"
-  NODE_ENV = "production"
-  PRIMARY_REGION = "nrt"
-
-[experimental]
-  allowed_public_ports = []
-  auto_rollback = true
-
-[[services]]
+[http_service]
   internal_port = 3000
-  protocol = "tcp"
-  script_checks = []
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ['app']
 
-  [services.concurrency]
-    hard_limit = 200
-    soft_limit = 150
-    type = "requests"
-
-  [[services.ports]]
-    handlers = ["http"]
-    port = 80
-    force_https = true
-
-  [[services.ports]]
-    handlers = ["tls", "http"]
-    port = 443
-
-  [[services.tcp_checks]]
-    grace_period = "10s"
-    interval = "15s"
-    restart_limit = 6
-    timeout = "2s"
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
